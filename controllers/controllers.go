@@ -51,26 +51,11 @@ func init() {
 
 // Home Handler
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	var todos []models.Todo
-	cur, err := db.Find(ctx, bson.D{})
-	if err != nil {
-		defer cur.Close(ctx)
-		rnd.JSON(w, http.StatusProcessing, renderer.M{
-			"message": "Failed to fetch todo",
-			"error":   err,
-		})
-		return
-	}
-
-	if err = cur.All(ctx, &todos); err != nil {
-		fmt.Println("failed to load data")
-	}
 
 	data := models.TemplateData{
 		CSRFToken: nosurf.Token(r),
-		Todos:     todos,
 	}
-	err = rnd.Template(w, http.StatusOK, []string{"views/index.html"}, data)
+	err := rnd.Template(w, http.StatusOK, []string{"views/index.html"}, data)
 	if err != nil {
 		log.Fatal(err)
 	}

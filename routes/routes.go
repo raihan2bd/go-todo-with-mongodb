@@ -13,6 +13,9 @@ func Router() http.Handler {
 	router.Use(middleware.Nosurf)
 	router.Get("/", controllers.HomeHandler)
 	router.Mount("/todo", todoHandler())
+	//serve static files
+	fileServer := http.FileServer(http.Dir("./static/"))
+	router.Handle("/static/*", http.StripPrefix("/static", fileServer))
 
 	return router
 }
