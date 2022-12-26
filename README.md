@@ -48,3 +48,6 @@ go run main.go
 ## 📝 License <a name="license"></a>
 
 This project is [MIT](./LICENSE) licensed.
+
+## Contribution
+*Your suggestions will be more than appreciated. If you want to suggest anything for this project feel free to do that. *
