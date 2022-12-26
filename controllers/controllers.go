@@ -226,3 +226,35 @@ func DeleteOneTodo(w http.ResponseWriter, r *http.Request) {
 		"todos":   todos,
 	})
 }
+
+// Delete completed todos
+func DeleteCompleted(w http.ResponseWriter, r *http.Request) {
+	filter := bson.M{
+		"completed": bson.M{
+			"$eq": true,
+		},
+	}
+	_, err := db.DeleteMany(ctx, filter)
+	if err != nil {
+		rnd.JSON(w, http.StatusProcessing, renderer.M{
+			"message": "Failed to delete completed todos",
+			"error":   err,
+		})
+		return
+	}
+
+	todos, err1 := helpers.FetchTodosFormDB(db)
+	if err1 != nil {
+		rnd.JSON(w, http.StatusProcessing, renderer.M{
+			"message": "Failed to fetch todo",
+			"error":   err1,
+		})
+
+		return
+	}
+
+	rnd.JSON(w, http.StatusOK, renderer.M{
+		"message": "todo is successfully deleted",
+		"todos":   todos,
+	})
+}

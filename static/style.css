@@ -126,9 +126,9 @@ body {
   width: 100%;
   display: flex;
   padding: 15px;
-  cursor: move;
   column-gap: 10px;
   align-items: center;
+  cursor: normal;
 }
 
 .todo-item:nth-child(odd) {
@@ -137,7 +137,9 @@ body {
 
 .done {
   text-decoration: line-through;
-  color: #de8cff;
+  color: #de8cff !important;
+  background: #6b407c !important;
+  text-decoration: line-through;
 }
 
 #todo-compleate {
@@ -152,6 +154,10 @@ body {
   background: inherit;
   border: none;
   cursor: pointer;
+}
+
+.btn-edit:disabled {
+  cursor: not-allowed !important;
 }
 
 .btn-clear-all {
@@ -227,9 +233,4 @@ body {
 
 .invalid-edit:focus-visible {
   outline-color: #f55;
-}
-
-.done {
-  text-decoration: line-through;
-  color: #de8cff;
 }

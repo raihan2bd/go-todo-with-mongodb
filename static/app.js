@@ -2,11 +2,9 @@
 const showMsg = document.querySelector(".show-msg");
 const hiddenId = document.getElementById("hidden_id");
 const todoForm = document.querySelector("#todo-form");
-const btnEdit = document.querySelectorAll(".btn-edit");
 const btnSubmit = document.querySelector(".btn-submit");
 const csrf_token = document.getElementById("csrf_token");
 const formInput = document.getElementById("description");
-const btnDelete = document.querySelectorAll(".btn-delete");
 const todoItemsDes = document.querySelectorAll(".todo-des");
 const filterButton = document.querySelector(".btn-clear-all");
 const todoContainer = document.querySelector(".todo-items-gropu");
@@ -113,6 +111,26 @@ const onDeleteTodo = async (id) => {
   }
 };
 
+const onDeleteCompletedTodos = async () => {
+  try {
+    const res = await fetch(`todo/delete-completed`, {
+      headers: {
+        "X-CSRF-Token": csrf_token.value,
+      },
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      console.log(res);
+      throw new Error(`Error: ${res.status} ${res.statusText}`);
+    }
+    const result = await res.json();
+    return result;
+  } catch (err) {
+    fireMsg(err, true);
+  }
+};
+
 // Render todos on dom
 const render = (todos) => {
   todoContainer.innerHTML = "";
@@ -128,36 +146,23 @@ const render = (todos) => {
       checkbox.id = "todo-compleate";
 
       checkbox.addEventListener("change", (e) => {
-        this.onCompleate(e);
+        if (checkbox.getAttribute("checked")) {
+          checkbox.removeAttribute("checked");
+        } else {
+          checkbox.setAttribute("checked", "yes");
+        }
+        checkbox.setAttribute("disabled", true);
+        clickCompleateTodo(
+          e.target.parentElement.id,
+          e.target.nextElementSibling.innerText,
+          e.target.getAttribute("checked")
+        );
       });
 
       // todo description
       const todoDes = document.createElement("p");
       todoDes.className = "todo-des";
       todoDes.innerText = todo.title;
-
-      // todo description
-      const todoEditInput = document.createElement("input");
-      todoEditInput.setAttribute("type", "text");
-      todoEditInput.setAttribute("value", todo.title);
-      todoEditInput.className = "todo-edit-input";
-
-      // Add event on keypress in the textarea
-      todoEditInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          editTodoItem(e);
-        }
-      });
-
-      if (todo.completed) {
-        checkbox.setAttribute("checked", "yes");
-        todoItem.classList.add("done");
-      }
-
-      const editCompleted = document.createElement("button");
-      editCompleted.className = "btn-delete";
-      editCompleted.innerHTML = `<img src="../static/assets/replace-24.png" alt="Delete" />`;
 
       // todo edit button
       const editBtn = document.createElement("button");
@@ -179,6 +184,12 @@ const render = (todos) => {
         deleteEvent(e);
       });
 
+      if (todo.completed) {
+        checkbox.setAttribute("checked", "yes");
+        todoItem.classList.add("done");
+        editBtn.setAttribute("disabled", "");
+      }
+
       // Append all the todo elements inside the todoItems
       todoItem.append(checkbox, todoDes, editBtn, deleteBtn);
 
@@ -191,15 +202,7 @@ const render = (todos) => {
   }
 };
 
-// // add todo item in dom
-// const addTodoItemOnDom = (title, id) => {
-//   const newTodo = document.createElement("li");
-//   newTodo.id = id;
-//   newTodo.className = "todo-item";
-//   newTodo.innerHTML = `<input type="checkbox" id="todo-compleate"><p class="todo-des">${title}</p><button class="btn-three-dot"><img src="../static/assets/three-dot-24.png" alt="More">`;
-//   todoContainer.appendChild(newTodo);
-// };
-
+// submit todos
 const submitOntodo = async (e) => {
   const title = e.target.value;
   if (hiddenId.value.length > 1) {
@@ -246,10 +249,27 @@ const deleteEvent = async (e) => {
   }
 };
 
-const editTodoItem = (e) => {
-  console.log(e);
+// on Completed todos
+const clickCompleateTodo = async (id, title, comp) => {
+  let completed = false;
+  if (comp === "yes") {
+    completed = true;
+  }
+  const result = await onUpdateTodo(id, title, completed);
+  if (result) {
+    render(result.todos);
+  }
 };
 
+// clear all completed todos
+filterButton.addEventListener("click", async () => {
+  const result = await onDeleteCompletedTodos();
+  if (result) {
+    render(result.todos);
+  }
+});
+
+// load todos on the fly
 window.onload = async () => {
   const result = await onFetchTodos();
   if (result) {
