@@ -1,35 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../static/style.css">
-  <title>Go Todo List With MongoDB</title>
-</head>
-<body>
-  <main class="container">
-    <input type="hidden" id="csrf_token" value="{{.CSRFToken}}">
-    <section class="todo-section">
-      <h1 class="todo-title">Today's Todo</h1>
-      <label for="description" class="show-msg"></label>
-      <form id="todo-form">
-        <input type="text" autocomplete="off" required min="5" max="255" placeholder="Add todo list here ..." name="description" id="description" class="input-group">
-      <button type="submit" class="btn-submit"><img src='../static/assets/enter-24.png' alt='submit'/></button>
-      </form>
-      <ul class="todo-items-gropu">
-        <!-- {{range .Todos}}
-          {{if .Completed}}
-              <li id="{{.ID}}" class="todo-item done"><input type="checkbox" checked id="todo-compleate"><p class="todo-des">{{.Title}}</p><button class="btn-three-dot"><img src="../static/assets/three-dot-24.png" alt="More"></button></li>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../static/style.css" />
+    <title>Go Todo List With MongoDB</title>
+  </head>
+  <body>
+    <main class="container">
+      <input type="hidden" id="csrf_token" value="{{.CSRFToken}}" />
+      <section class="todo-section">
+        <h1 class="todo-title">Today's Todo</h1>
+        <label for="description" class="show-msg"></label>
+        <form id="todo-form">
+          <input id="hidden_id" type="hidden" value="" />
+          <input
+            type="text"
+            autocomplete="off"
+            required
+            min="5"
+            max="255"
+            placeholder="Add todo list here ..."
+            name="description"
+            id="description"
+            class="input-group"
+          />
+          <button type="submit" class="btn-submit">
+            <img src="../static/assets/enter-24.png" alt="submit" />
+          </button>
+        </form>
+        <ul class="todo-items-gropu">
+          <!-- {{range .Todos}} {{if .Completed}}
+          <li id="{{.ID}}" class="todo-item done">
+            <input type="checkbox" checked id="todo-compleate" />
+            <p class="todo-des">{{.Title}}</p>
+            <button class="btn-edit">
+              <img src="../static/assets/edit-24.png" alt="Edit" />
+            </button>
+            <button class="btn-delete">
+              <img src="../static/assets/trash-24.png" alt="Delete" />
+            </button>
+          </li>
           {{else}}
-              <li id="{{.ID}}" class="todo-item"><input type="checkbox" id="todo-compleate"><p class="todo-des">{{.Title}}</p><button class="btn-three-dot"><img src="../static/assets/three-dot-24.png" alt="More"></button></li>
-          {{end}}
-        {{end}} -->
-      </ul>
-      <button class="btn-clear-all">Clear all completed</button>
-    </section>
-  </main>
-  <script src="../static/app.js"></script>
-</body>
+          <li id="{{.ID}}" class="todo-item">
+            <input type="checkbox" id="todo-compleate" />
+            <p class="todo-des">{{.Title}}</p>
+            <button class="btn-edit">
+              <img src="../static/assets/edit-24.png" alt="Edit" />
+            </button>
+            <button class="btn-delete">
+              <img src="../static/assets/trash-24.png" alt="Delete" />
+            </button>
+          </li>
+          {{end}} {{else}}
+          <p class="no-item">There is no todo to show! Please add a new one.</p>
+          {{end}} -->
+        </ul>
+        <button class="btn-clear-all">Clear all completed</button>
+      </section>
+    </main>
+    <script src="../static/app.js"></script>
+  </body>
 </html>

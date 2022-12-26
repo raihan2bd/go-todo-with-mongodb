@@ -3,7 +3,6 @@ package controllers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -13,6 +12,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	"github.com/justinas/nosurf"
+	"github.com/raihan2bd/go-todo-with-mongodb/helpers"
 	"github.com/raihan2bd/go-todo-with-mongodb/models"
 	"github.com/thedevsaddam/renderer"
 	"go.mongodb.org/mongo-driver/bson"
@@ -51,11 +51,21 @@ func init() {
 
 // Home Handler
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	todos, err := helpers.FetchTodosFormDB(db)
+	if err != nil {
+		rnd.JSON(w, http.StatusProcessing, renderer.M{
+			"message": "Failed to fetch todo",
+			"error":   err,
+		})
+
+		return
+	}
 
 	data := models.TemplateData{
 		CSRFToken: nosurf.Token(r),
+		Todos:     todos,
 	}
-	err := rnd.Template(w, http.StatusOK, []string{"views/index.html"}, data)
+	err = rnd.Template(w, http.StatusOK, []string{"views/index.html"}, data)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,22 +73,15 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 // Fetch all todos
 func FetchTodos(w http.ResponseWriter, r *http.Request) {
-	// var todoM Todo
-	var todos []models.Todo
-	cur, err := db.Find(ctx, bson.D{})
+	todos, err := helpers.FetchTodosFormDB(db)
 	if err != nil {
-		defer cur.Close(ctx)
 		rnd.JSON(w, http.StatusProcessing, renderer.M{
 			"message": "Failed to fetch todo",
 			"error":   err,
 		})
+
 		return
 	}
-
-	if err = cur.All(ctx, &todos); err != nil {
-		fmt.Println("failed to load data")
-	}
-
 	rnd.JSON(w, http.StatusOK, renderer.M{
 		"data": todos,
 	})
@@ -86,7 +89,7 @@ func FetchTodos(w http.ResponseWriter, r *http.Request) {
 
 // Create todo
 func CreateTodo(w http.ResponseWriter, r *http.Request) {
-	var t models.Todo
+	var t models.TodoModel
 	if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
 		rnd.JSON(w, http.StatusProcessing, err)
 		return
@@ -100,14 +103,14 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tm := models.Todo{
+	tm := models.TodoModel{
 		ID:        t.ID,
 		Title:     t.Title,
 		Completed: false,
 		CreatedAt: time.Now(),
 	}
 
-	result, err := db.InsertOne(ctx, &tm)
+	_, err := db.InsertOne(ctx, &tm)
 	if err != nil {
 		rnd.JSON(w, http.StatusProcessing, renderer.M{
 			"message": "Failed to save",
@@ -116,9 +119,19 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	todos, err := helpers.FetchTodosFormDB(db)
+	if err != nil {
+		rnd.JSON(w, http.StatusProcessing, renderer.M{
+			"message": "Failed to fetch todo",
+			"error":   err,
+		})
+
+		return
+	}
+
 	rnd.JSON(w, http.StatusCreated, renderer.M{
 		"message": "todo is created successfully",
-		"todo_id": result.InsertedID,
+		"todos":   todos,
 	})
 }
 
@@ -134,7 +147,7 @@ func UpdateTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var t models.Todo
+	var t models.TodoModel
 
 	if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
 		rnd.JSON(w, http.StatusProcessing, err)
@@ -161,8 +174,19 @@ func UpdateTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	todos, err := helpers.FetchTodosFormDB(db)
+	if err != nil {
+		rnd.JSON(w, http.StatusProcessing, renderer.M{
+			"message": "Failed to fetch todo",
+			"error":   err,
+		})
+
+		return
+	}
+
 	rnd.JSON(w, http.StatusOK, renderer.M{
 		"message": "Todo updated successfully",
+		"todos":   todos,
 	})
 }
 
@@ -187,8 +211,18 @@ func DeleteOneTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	todos, err1 := helpers.FetchTodosFormDB(db)
+	if err1 != nil {
+		rnd.JSON(w, http.StatusProcessing, renderer.M{
+			"message": "Failed to fetch todo",
+			"error":   err1,
+		})
+
+		return
+	}
+
 	rnd.JSON(w, http.StatusOK, renderer.M{
 		"message": "todo is successfully deleted",
+		"todos":   todos,
 	})
-	fmt.Println("todo is successfully deleted")
 }
